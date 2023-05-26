@@ -1,0 +1,33 @@
+{
+  "name": "send-audio-queue-to-azure-speech-to-text",
+  "version": "1.0.0",
+  "description": "This Node.js script takes the audios from the Input folder and sends them to Azure Pronunciation Assessment and saves the results in the Output folder.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/augusto539/send-audio-queue-to-azure-speech-to-text"
+  },
+  "keywords": [
+    "Node.js",
+    "AI",
+    "Speech",
+    "to",
+    "text",
+    "Azure",
+    "Microsoft"
+  ],
+  "author": "Augusto Antonelli",
+  "license": "ISC",
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "difflib": "^0.2.4",
+    "dotenv": "^16.0.3",
+    "lodash": "^4.17.21",
+    "lodash.foreach": "^4.5.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.28.0",
+    "segment": "^0.1.3"
+  }
+}
