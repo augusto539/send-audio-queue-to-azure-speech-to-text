@@ -79,6 +79,7 @@ async function PronunciationAssessment(settings, fileName) {
         fluencyScores.push(nb.PronunciationAssessment.FluencyScore);
         const isSucceeded = jo.RecognitionStatus === 'Success';
         const nBestWords = jo.NBest[0].Words;
+        // console.log(jo.NBest)
         const durationList = [];
         _.forEach(nBestWords, (word) => {
             recognizedWords.push(word);
@@ -275,10 +276,13 @@ async function PronunciationAssessment(settings, fileName) {
             words: lastWords
         }
 
-        console.log('------------------------------ Translated: \x1b[32m',`${fileName}\x1b[0m`,'\x1b[0m------------------------------');
+        console.log(jo.NBest)
+
+        // console.log('------------------------------ Translated: \x1b[32m',`${fileName}\x1b[0m`,'\x1b[0m------------------------------');
 
         // i write the data in a .json in the output folder
-        await fs.writeFile(`./Output/${fileName}.json`, JSON.stringify( data, null, 2), (error) => {
+        // await fs.writeFile(`./Output/${fileName}.json`, JSON.stringify( data, null, 2), (error) => {
+        await fs.writeFile(`./Output/${fileName}.json`, JSON.stringify( jo.NBest, null, 2), (error) => {
             if (error) {
                 console.log(error)
             }
