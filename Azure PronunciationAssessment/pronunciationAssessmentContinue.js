@@ -48,6 +48,8 @@ async function PronunciationAssessment(settings, fileName) {
     var durations = [];
     var jo = {};
 
+    var AllJoS = []
+
     // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
     // The event recognizing signals that an intermediate recognition result is received.
@@ -55,7 +57,7 @@ async function PronunciationAssessment(settings, fileName) {
     // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
 
     reco.recognizing = function (s, e) {
-        var str = "(recognizing) Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text;
+        var str = "\x1b[32m (recognizing)\x1b[0m Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text;
         console.log(str);
     };
 
@@ -90,6 +92,8 @@ async function PronunciationAssessment(settings, fileName) {
         if (isSucceeded && nBestWords) {
             allWords.push(...nBestWords);
         }
+
+        AllJoS.push(jo)
     };
 
     async function calculateOverallPronunciationScore() {
@@ -271,22 +275,55 @@ async function PronunciationAssessment(settings, fileName) {
         //     console.log("    ", ind + 1, ": word: ", word.Word, "\taccuracy score: ", word.PronunciationAssessment.AccuracyScore, "\terror type: ", word.PronunciationAssessment.ErrorType, ";");
         // });
 
-        const data = {
-            scores: scores,
-            words: lastWords
-        }
+        jo.NBest[0].number_words_recognized = jo.NBest[0].Lexical.split(' ').length
 
-        console.log(jo.NBest)
+        const lista_textos  = AllJoS.map( parrafo => parrafo.DisplayText)
+        const texto = lista_textos.join(" ")
 
+
+        const media_confianzas = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].Confidence))
+
+        const media_AccuracyScore = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].PronunciationAssessment.AccuracyScore))
+        const media_FluencyScore = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].PronunciationAssessment.FluencyScore))
+        const media_CompletenessScore = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].PronunciationAssessment.CompletenessScore))
+        const media_PronScore = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].PronunciationAssessment.PronScore))
+
+
+
+        const data = [
+            {
+                input: {
+                    "texto de referencia": reference_text,
+                    "cantidad de palabras": reference_text.split(' ').length
+                },
+                output: {
+                    "texto completo": texto,
+                    "cantidad de palabras": texto.split(' ').length,
+                    "media de confianza": media_confianzas,
+                    "media de AccuracyScore": media_AccuracyScore,
+                    "media de FluencyScore": media_FluencyScore,
+                    "media de CompletenessScore": media_CompletenessScore,
+                    "media de PronScore": media_PronScore,
+                    parrafos: AllJoS
+                }
+            }
+        ]
+
+        // console.log(jo.NBest)
+
+        // console.log('')
+        // console.log('')
         // console.log('------------------------------ Translated: \x1b[32m',`${fileName}\x1b[0m`,'\x1b[0m------------------------------');
-
+        // console.log('')
+        // console.log('')
+        
         // i write the data in a .json in the output folder
         // await fs.writeFile(`./Output/${fileName}.json`, JSON.stringify( data, null, 2), (error) => {
-        await fs.writeFile(`./Output/${fileName}.json`, JSON.stringify( jo.NBest, null, 2), (error) => {
+        await fs.writeFile(`./Output/${fileName}.json`, JSON.stringify(data, null, 2), (error) => {
             if (error) {
                 console.log(error)
             }
-        })
+        }) 
 
     };
 
@@ -299,7 +336,7 @@ async function PronunciationAssessment(settings, fileName) {
     //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
     reco.canceled = function (s, e) {
         if (e.reason === sdk.CancellationReason.Error) {
-            var str = "(cancel) Reason: " + sdk.CancellationReason[e.reason] + ": " + e.errorDetails;
+            var str = "\x1b[31m (cancel)\x1b[0m Reason: " + sdk.CancellationReason[e.reason] + ": " + e.errorDetails;
             console.log(str);
         }
         reco.stopContinuousRecognitionAsync();
@@ -316,6 +353,19 @@ async function PronunciationAssessment(settings, fileName) {
     };
 
     reco.startContinuousRecognitionAsync();
+
+
+    function calcular_madia_de_lista(lista){
+
+        const suma = lista.reduce((a, b) => a + b, 0);
+
+        const media = suma / lista.length
+
+        return media
+    }
+
+
+    return "kk"
 }
 
 

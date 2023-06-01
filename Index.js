@@ -3,20 +3,43 @@ const PA = require("./Azure PronunciationAssessment/pronunciationAssessmentConti
 const settings = require("./Azure PronunciationAssessment/settings.js");
 
 
-async function main(){
+async function main() {
 
     const files = await fs.readdir("./Input");
 
+    const texto_para_2do = await fs.readFile("./Reference texts/2do.txt", 'utf8');
+    const texto_para_4to = await fs.readFile("./Reference texts/4to.txt", 'utf8');
 
-    files.map( (file, index) => {
 
-        // console.log('------------------------------ Translating: \x1b[32m',`${file}\x1b[0m, File: \x1b[33m${index}\x1b[0m of: \x1b[33m${files.length}` ,'\x1b[0m------------------------------');
+    files.map(async (file, index) => {
 
-        settings.filename = `./Input/${file}`
+        let time = 0
 
-        settings.reference_text = `whats the weather like`
+        if (index === 0) {
+            time = 0
+        } else {
+            time = 150000 * index
+        }
 
-        PA.PronunciationAssessment(settings, file)
+
+        console.log(time)
+
+        setTimeout(() => {
+            console.log('')
+            console.log('')
+            console.log('------------------------------ Translated: \x1b[32m', `${file}\x1b[0m`, '\x1b[0m------------------------------');
+            console.log('')
+            console.log('')
+
+            settings.filename = `./Input/${file}`
+
+            if (file.split(".")[0] < 14) {
+                settings.reference_text = texto_para_2do
+            } else {
+                settings.reference_text = texto_para_4to
+            }
+            PA.PronunciationAssessment(settings, file)
+        }, time);
 
     })
 };
