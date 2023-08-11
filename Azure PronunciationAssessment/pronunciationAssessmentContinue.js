@@ -10,7 +10,7 @@ var difflib = require('difflib');
 const fs = require('fs').promises;
 
 
-async function PronunciationAssessment(settings, fileName) {
+async function PronunciationAssessment(settings, fileName, duration) {
     // now create the audio-config pointing to our stream and
     // the speech config specifying the language.
     var wavFileHeader = filePushStream.readWavFileHeader(settings.filename);
@@ -65,13 +65,13 @@ async function PronunciationAssessment(settings, fileName) {
     // This is the final event that a phrase has been recognized.
     // For continuous recognition, you will get one recognized event for each phrase recognized.
     reco.recognized = function (s, e) {
-        console.log("pronunciation assessment for: ", e.result.text);
+        // console.log("pronunciation assessment for: ", e.result.text);
         var pronunciation_result = sdk.PronunciationAssessmentResult.fromResult(e.result);
-        console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
-            "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
-            "completeness score : ", pronunciation_result.completenessScore, '\n',
-            "fluency score: ", pronunciation_result.fluencyScore
-        );
+        // console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
+        //     "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
+        //     "completeness score : ", pronunciation_result.completenessScore, '\n',
+        //     "fluency score: ", pronunciation_result.fluencyScore
+        // );
 
         jo = eval("(" + e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult) + ")");
         const nb = jo["NBest"][0];
@@ -281,6 +281,12 @@ async function PronunciationAssessment(settings, fileName) {
         const texto = lista_textos.join(" ")
 
 
+        // let duracion_del_audio_array = lastWords.map( word => word.Duration)
+
+        // duracion_del_audio_array = duracion_del_audio_array.filter((item) => item !== undefined)
+
+        // const duracion_del_audio = duracion_del_audio_array.reduce((a, b) => a + b, 0);
+
         const media_confianzas = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].Confidence))
 
         const media_AccuracyScore = calcular_madia_de_lista(AllJoS.map( parrafo => parrafo.NBest[0].PronunciationAssessment.AccuracyScore))
@@ -298,14 +304,16 @@ async function PronunciationAssessment(settings, fileName) {
                 },
                 output: {
                     "texto completo": texto,
+                    "duracion del audio": duration,
                     "cantidad de palabras": texto.split(' ').length,
                     "media de confianza": media_confianzas,
                     "media de AccuracyScore": media_AccuracyScore,
                     "media de FluencyScore": media_FluencyScore,
                     "media de CompletenessScore": media_CompletenessScore,
                     "media de PronScore": media_PronScore,
-                    parrafos: AllJoS
-                }
+                    // parrafos: AllJoS
+                    lastWords: lastWords
+                },
             }
         ]
 
